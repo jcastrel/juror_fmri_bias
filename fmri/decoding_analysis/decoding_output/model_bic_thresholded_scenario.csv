@@ -1,0 +1,16 @@
+,event,model,bic
+0,scenario,extra_evidentiary,3320.2270269897367
+1,scenario,evidentiary,3191.0543455848147
+2,scenario,narrative,3251.1706533381516
+3,scenario,utility,3393.7983950360285
+4,scenario,affect,3512.7502200485783
+5,scenario,moral_judgment,3303.7927596420823
+6,scenario,exp_cult_recall_narrative,3265.5324241141197
+7,scenario,reading_narrative,3478.957555750155
+8,scenario,wm_narrative,3501.9419695585125
+9,scenario,utility_probability,3451.303633715825
+10,scenario,utility_value,3445.03659036613
+11,scenario,moral_judgment_social,3308.006004076207
+12,scenario,moral_judgment_mj,3469.8842066792326
+13,scenario,exp_cult_recall_narrative_cult_id_bias,3263.7572520078843
+14,scenario,exp_cult_recall_narrative_recall,3516.1095376372336

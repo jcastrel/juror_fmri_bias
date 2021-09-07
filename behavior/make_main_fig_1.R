@@ -1,0 +1,124 @@
+# make figure showing: (1.) task schematic, (2.) evidence & scenario effects plot, (3.)correlation plot, & (4.) PCA plot
+library(tidyverse)
+library(grid)
+library(gridExtra)
+library(rstan)
+library(magick)
+library(gtable)
+library(gridBase)
+library(ggpubr)
+library(rjson)
+library(ggrepel)
+
+source('ggplot_setup.R')
+load('data/stan_postprocess_2v_t.rdata')
+effects <- effects %>% filter(group =='mri')
+dat <- dat %>% filter(group=='mri')
+
+####################
+#PANEL A
+# task mockup from svg
+task_mock <- image_read_pdf('figs/task_mockup.pdf') #8 x 5 fig
+task_mock_trimmed <- image_trim(task_mock)
+panel_A <- ggplot() +
+  annotation_custom(rasterGrob(task_mock_trimmed,interpolate=TRUE)) +
+  theme(text=element_text(family="Helvetica"),
+        plot.title = element_text(family="Helvetica",face="bold"),
+        panel.border = element_rect(colour = "white", fill=NA, size=0),
+        panel.background = element_rect(colour = "white", fill=NA, size=0),
+        axis.line=element_blank(),
+        plot.margin=unit(c(25.5, 25.5, 0, 25.5),"points"))
+
+ggsave('figs/main_fig_1_A.pdf', plot=panel_A, width=5, height=4, units='in')
+
+############### Panel B: Crime effects ############################
+
+#get the scenario with the maximum mean rating (scenario 14)
+example_scenario <- effects %>% filter(variable == 'gamma', evidence == 'baseline', outcome=='rating') %>% 
+  select(scenario, mean, X2.5., X97.5.) %>%
+  mutate(outcome='rating',
+         scenario = factor(scenario))
+
+#get scenario text
+json_file <- 'data/scenarios.json'
+json_data <- fromJSON(file=json_file)
+scnum <- example_scenario$scenario[[14]]
+sc_text <- json_data[[scnum]]$vars$base$Base
+
+# get scenario effects
+se <- effects %>% filter(variable == 'gamma', evidence == 'baseline', outcome=='rating') %>% 
+  select(scenario, mean, X2.5., X97.5.) %>%
+  mutate(outcome='rating',
+         scenario = factor(scenario))
+
+#quick ordering
+se$rank <- rank(se$mean)
+
+#add an indicator variable column to highlight our example in panel B
+se <- se %>%
+  mutate(highlight = ifelse(scenario == scnum, "yes", "no"))
+
+plt_b <- ggplot(data=se) +
+  geom_hline(yintercept=0, colour='grey') +
+  geom_pointrange(aes(colour = "black", fill = highlight, shape = highlight, x=reorder(scenario, rank),
+                      y=mean, ymin=X2.5., ymax=X97.5.), size=.75,position=position_dodge(width = 0.75)) +
+  expand_limits(x= c(-1, length(levels(se$rank)) + 2))+
+  group_color_scale +
+  coord_cartesian(ylim=c(-10,50)) +
+  ggtitle("") +
+  ylab("Case Strength") +
+  xlab("Crime Type") +
+  th + 
+  theme(text=element_text(family="Helvetica"),
+        plot.title = element_text(family="Helvetica",face="plain")) +
+  theme(plot.margin=unit(c(0, 5.5, 25.5, 25.5),"points")) +
+  theme(text=element_text(family="Helvetica"),
+        plot.title = element_text(family="Helvetica",face="plain")) +
+  geom_segment(aes(x = 1, y = -5, xend=32, yend=-5),
+               arrow = arrow(length = unit(0.5, "cm"),ends = 'both')) +
+  annotate("text", x = 6, y = -9, label = "victimless", size=rel(5))+
+  annotate("text", x = 29, y = -9, label = "homicide", size=rel(5))+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  #theme(axis.title.x = element_text(vjust = 15)) +
+  theme(axis.text.x = element_blank()) +
+  scale_shape_manual(values = c(21, 24))+
+  scale_fill_manual(values=c("white", "black"), aesthetics="fill") + 
+  scale_colour_manual(values=c("black", "red"), aesthetics="color")
+
+panel_B <- ggplot_gtable(ggplot_build(plt_b))
+panel_B$layout$clip[panel_B$layout$name == "panel"] <- "off"
+grid::grid.draw(panel_B)
+
+############### Panel C: Case Strength/Punishment Correlation ############################
+
+#read data
+fmri_data <- read.csv(file="data/scenario_effects_fmri_sample.csv",
+                      header=TRUE, sep = ",",
+                      na.strings=c("","NA"))
+
+#plot
+plt_c <- ggplot(fmri_data, aes(x=punishment_mean, y=case_strength_mean)) +
+  geom_point(color = "black", fill = "black", shape = 21, size = 3) + th +
+  xlab("Punishment") + ylab("Case Strength") + coord_cartesian(ylim=c(-10,50)) + xlim(10,95) +
+  theme(text=element_text(family="Helvetica"),
+        plot.title = element_text(family="Helvetica",face="bold"),
+        panel.border = element_rect(colour = "white", fill=NA, size=0),
+        panel.background = element_rect(colour = "white", fill=NA, size=0),
+        plot.margin=unit(c(0, 25.5, 25.5, 5.5),"points"))
+
+panel_C <- ggplot_gtable(ggplot_build(plt_c))
+panel_C$layout$clip[panel_C$layout$name == "panel"] <- "off"
+grid::grid.draw(panel_C)
+
+############### Combine into a single figure ##################################
+# make a list of panels
+combo_plot <- ggarrange(panel_A,
+                        ggarrange(panel_B, panel_C, labels=c('B','C'),font.label = list(size = 20),
+                                  align = 'hv', widths = c(3,2), ncol = 2), nrow = 2,labels = "A",
+                        font.label = list(size = 20), heights = c(1,1))
+
+#combo_plot<-combo_plot+theme(plot.margin=unit(c(25.5, 25.5, 25.5, 25.5), "points"))
+
+ggsave('figs/main_fig_1.pdf', plot=combo_plot,
+       width=12, height=8,
+       units='in', useDingbats=FALSE)
