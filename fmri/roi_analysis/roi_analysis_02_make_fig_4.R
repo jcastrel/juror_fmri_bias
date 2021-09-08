@@ -46,7 +46,7 @@ data <- within(data, {
 # fMRI Social Map Overlays - Fig 4A
 #################################################################
 # social maps for panel
-social_maps <- image_read_pdf('../decoding_analysis/social_maps/social_topic_maps.pdf') #8 x 5 fig
+social_maps <- image_read_pdf('../decoding_analysis/social_maps/Fig_4a.pdf') #8 x 5 fig
 social_maps_trimmed <- image_trim(social_maps)
 
 panel_A <- ggplot() +
@@ -56,7 +56,7 @@ panel_A <- ggplot() +
   theme(panel.border = element_rect(colour = "white", fill=NA, size=0)) +
   theme(panel.background = element_rect(colour = "white", fill=NA, size=0)) +
   theme(axis.line=element_blank())+
-  theme(plot.margin=unit(c(25.5, 0, 5.5, 25.5),"points"))
+  theme(plot.margin=unit(c(25.5, 25.5, 0, 25.5),"points"))
 
 
 #################################################################
@@ -98,8 +98,8 @@ behavior_victim_type_plot_PC1 <- effect_plot(victim_type_behavior_PC1,
                                              confint = TRUE) + th +
   geom_hline(yintercept=0, colour='grey') +
   theme(text=element_text(family="Helvetica")) + th +
-  labs(y = "Crime-Type Bias") +
-  theme(plot.margin=unit(c(25.5, 25.5, 0, 5.5),"points")) + ylim(-2.5,2.5) +
+  labs(y = "Crime-type Bias") +
+  theme(plot.margin=unit(c(5.5, 5.5, 25.5, 25.5),"points")) + ylim(-2.5,2.5) +
   theme(axis.text.x = element_text(angle = 45, hjust=0.95)) +
   theme(axis.title.x = element_blank())
 
@@ -125,22 +125,31 @@ fmri_victim_type_plot <- effect_plot(fmri_victim_type,
   geom_hline(yintercept=0, colour='grey') +
   theme(text=element_text(family="Helvetica")) + th +
   labs(y = "Crime-type bias fMRI activation", x = "Crime Type") +
-  theme(plot.margin=unit(c(5.5, 25.5, 5.5, 5.5),"points")) + ylim(-0.45,0.45) +
-  theme(axis.text.x = element_text(angle = 45, hjust=0.95))
+  theme(plot.margin=unit(c(5.5, 25.5, 5.5, 0),"points")) + ylim(-0.45,0.45) +
+  theme(axis.text.x = element_text(angle = 45, hjust=0.95)) +
+  theme(axis.title.x = element_blank())
 
 
 
 ################################################################
 #merge plots
+
 combo_plot <- ggarrange(panel_A,
-                        ggarrange(behavior_victim_type_plot_PC1,
-                                  fmri_victim_type_plot,
-                                  labels=c('B','C'),hjust = 0.6,vjust = c(1.5,-0.5),
-                                  font.label = list(size = 20),
-                                  align = 'hv',heights = c(1,1), nrow = 2),
-                        ncol = 2,labels = "A",
-                        font.label = list(size = 20), widths=c(2,1.25),
-                        vjust = 1.5, hjust = -0.25, align = 'v')
+                        ggarrange(behavior_victim_type_plot_PC1,fmri_victim_type_plot,
+                                  labels=c('B','C'), font.label = list(size = 20), hjust = 1.0,
+                                  align = 'hv', widths = c(1,1), heights = c(1,1), ncol = 2),
+                        nrow = 2,labels = "A", font.label = list(size = 20), heights=c(1,1),
+                        widths=c(1,1), align = 'hv')
+
+# combo_plot <- ggarrange(panel_A,
+#                         ggarrange(behavior_victim_type_plot_PC1,
+#                                   fmri_victim_type_plot,
+#                                   labels=c('B','C'),hjust = 0.6,vjust = c(1.5,-0.5),
+#                                   font.label = list(size = 20),
+#                                   align = 'hv',heights = c(1,1), nrow = 2),
+#                         ncol = 2,labels = "A",
+#                         font.label = list(size = 20), widths=c(3,1),
+#                         vjust = 1.5, hjust = -0.25, align = 'v')
 
 ggsave('plots/main_fig_4.pdf', plot=combo_plot,
-       width=14, height=10, units='in', useDingbats=FALSE)
+       width=10, height=10, units='in', useDingbats=FALSE)
