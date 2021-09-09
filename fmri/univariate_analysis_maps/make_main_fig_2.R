@@ -40,10 +40,10 @@ panel_B <- ggplot() +
 ############### Combine into a single figure ##################################
 # make a list of panels
 combo_plot <- ggarrange(panel_A, panel_B, labels=c('A','B'),font.label = list(size = 20),
-                                  align = 'v', widths = c(1,1), ncol = 1, nrow = 2, heights = c(1,2))
+                                  align = 'v', widths = c(1,1), ncol = 1, nrow = 2, heights = c(1,1))
 
 #combo_plot<-combo_plot+theme(plot.margin=unit(c(25.5, 25.5, 25.5, 25.5), "points"))
 
 ggsave('figs/main_fig_2.pdf', plot=combo_plot,
-       width=12, height=10,
+       width=12, height=12,
        units='in', useDingbats=FALSE)
