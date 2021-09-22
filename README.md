@@ -1,5 +1,5 @@
 # juror_fmri_bias
-Analysis scripts and limited code associated with the manuscript "Social cognitive processes explain bias in juror decisions." [Preprint Link]()
+Analysis scripts and limited code associated with the manuscript "Social cognitive processes explain bias in juror decisions." [Preprint Link](https://psyarxiv.com/v56wz/)
 
 - behavior: hierarchical Bayesian modeling of case strength and punishment ratings and scenario text analysis
 - fmri: neurosynth-based decoding of decision making, roi analysis, and univariate results plotting
